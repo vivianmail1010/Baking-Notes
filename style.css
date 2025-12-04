@@ -1,0 +1,1471 @@
+html,
+body {
+  height: 100%;
+}
+
+/* 全域設定 */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Noto Sans TC",
+    "Helvetica Neue", Arial, sans-serif;
+  background: radial-gradient(circle at top left, #f4efe8 0, #f6f5f2 40%, #f3f1ec 100%);
+  color: #222;
+}
+
+body {
+  overscroll-behavior-x: none;
+}
+
+/* App 容器 */
+/* App 容器：預設視為「手機版」 */
+.app-shell {
+  width: 96%;
+  max-width: 480px;      /* 手機主寬度 */
+  margin: 0 auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+}
+
+/* Header */
+.app-header {
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.app-header-card {
+  background: linear-gradient(135deg, #fdfaf6 0%, #f7f3ec 40%, #f1ede7 100%);
+  border-radius: 20px;
+  padding: 16px 18px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+}
+
+.app-header-text h1 {
+  font-size: 1.8rem;
+  margin: 0;
+}
+
+.app-header-text .subtitle {
+  margin-top: 4px;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+/* ✅ 主題下面的四個目錄 */
+.main-tabs {
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+/* tab 按鈕的外觀 */
+.tab-button {
+  flex: 1;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 999px;
+  background: #f3f3f3;
+  font-size: 0.9rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tab-button.active {
+  background: #ffb347;
+  color: #fff;
+}
+
+/* Main content */
+.app-main {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;  /* 🔴 重要：主內容不要左右捲動 */
+  padding-bottom: 24px;
+}
+
+.card,
+.form-section,
+.filter-block,
+.filter-panel {
+  max-width: 100%;
+}
+
+.card-title,
+.card-tags,
+.recipe-preview-text {
+  word-wrap: break-word;
+  word-break: break-word;
+}
+
+.view {
+  display: none;
+}
+
+.view.active {
+  display: block;
+}
+
+.view-title {
+  font-size: 1.1rem;
+  margin: 8px 4px 12px;
+  font-weight: 600;
+}
+
+/* 🔖 食譜分類快速 Tab 列 */
+.recipe-category-tabs {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+  margin: 4px 0 10px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.recipe-category-tab {
+  flex-shrink: 0;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid #e0d6c8;
+  background: #fffaf3;
+  font-size: 0.85rem;
+  cursor: pointer;
+  color: #555;
+}
+
+.recipe-category-tab.active {
+  background: #222;
+  color: #fff;
+  border-color: #222;
+}
+
+.recipe-category-tab:active {
+  transform: translateY(1px);
+}
+
+/* 卡片列表 */
+.card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.card {
+  background-color: #fff;
+  border-radius: 18px;
+  padding: 14px 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+  border: 1px solid #f0ece5;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.card-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+  font-size: 1rem;
+}
+
+.card-meta {
+  font-size: 0.8rem;
+  color: #777;
+  margin-bottom: 4px;
+}
+
+.card-tags {
+  font-size: 0.75rem;
+  color: #555;
+}
+
+.recipe-source-link {
+  color: #1a73e8;
+  text-decoration: underline;
+  cursor: pointer;
+  word-break: break-all;
+}
+
+.recipe-source-link:hover {
+  text-decoration: none;
+}
+
+/* 來源 / 連結樣式 */
+.card-tags a {
+  color: #c47a1c;          /* 你可以換成喜歡的焦糖色系 */
+  text-decoration: underline;
+  word-break: break-all;   /* 長網址在手機上會自動換行，不會把版面撐爆 */
+}
+
+/* 卡片底部動作區（編輯按鈕） */
+.card-actions {
+  margin-top: 8px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.card-edit-btn {
+  font-size: 0.8rem;
+  padding: 4px 12px;
+}
+
+/* 讓食譜卡可以點擊展開 */
+.recipe-caret {
+  font-size: 0.8rem;
+  color: #bbb;
+  transform: rotate(-90deg);
+  transition: transform 0.15s ease, color 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+}
+
+.card.expanded .recipe-caret {
+  transform: rotate(0deg);
+  color: #777;
+}
+
+/* 展開預覽區塊 */
+.recipe-preview {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed #eee;
+  font-size: 0.8rem;
+  color: #555;
+}
+
+.recipe-preview-row {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.recipe-preview-label {
+  font-weight: 600;
+  margin-right: 4px;
+  color: #777;
+  flex: 0 0 auto;
+}
+
+.recipe-preview-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  line-height: 1.4;
+}
+
+.recipe-preview {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed #eee;
+  font-size: 0.8rem;
+  color: #555;
+}
+
+/* 預覽區：材料那一段變成直向排版 + 列表 */
+.recipe-preview-row-ingredients {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.recipe-preview-row-ingredients .recipe-preview-label {
+  margin-bottom: 4px;
+}
+
+/* 材料列表 */
+.recipe-preview-list {
+  list-style: none;
+  margin: 0;
+  padding-left: 0;
+}
+
+.recipe-preview-list li {
+  line-height: 1.5;
+  margin-bottom: 2px;
+}
+
+/* 表單區 */
+.form-section {
+  margin-top: 16px;
+  padding: 14px 16px 16px;
+  background-color: #fff;
+  border-radius: 18px;
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.04);
+  border: 1px solid #f0ece5;
+}
+
+.form-section h3 {
+  margin-top: 0;
+  font-size: 1rem;
+}
+
+.form-row {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+}
+
+.form-row label {
+  font-size: 0.85rem;
+  margin-bottom: 4px;
+  color: #444;
+}
+
+input,
+select,
+textarea {
+  padding: 7px 9px;
+  border-radius: 10px;
+  border: 1px solid #ded9d0;
+  font-size: 0.9rem;
+  font-family: inherit;
+  background-color: #fbfaf8;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #c79a5f;
+  box-shadow: 0 0 0 1px rgba(199, 154, 95, 0.3);
+  background-color: #fff;
+}
+
+textarea {
+  resize: vertical;
+}
+
+/* 表單底部按鈕區（儲存 / 取消編輯） */
+.form-actions {
+  margin-top: 16px;
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+/* 按鈕 */
+.primary-btn {
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(135deg, #222 0%, #333 100%);
+  color: #fff;
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.primary-btn:hover {
+  opacity: 0.94;
+  transform: translateY(-1px);
+}
+
+.primary-btn:active {
+  transform: translateY(0);
+  opacity: 0.9;
+}
+
+.secondary-btn {
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid #222;
+  background-color: #fff;
+  color: #222;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.secondary-btn:hover {
+  background-color: #f3f2f0;
+}
+
+/* 小提示文字 */
+.helper-text {
+  font-size: 0.8rem;
+  color: #777;
+  margin-top: 6px;
+}
+
+/* 分區標題 */
+.section-title {
+  margin: 12px 4px 4px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #555;
+  text-transform: none;
+}
+
+.empty-text {
+  font-size: 0.9rem;
+  color: #777;
+  padding: 8px 4px;
+}
+
+/* 材料輸入 + 表格 */
+.ingredient-inputs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.ingredient-inputs input[type="text"],
+.ingredient-inputs input[type="number"],
+.ingredient-inputs select {
+  flex: 1;
+  min-width: 120px;
+}
+@media (max-width: 600px) {
+  .ingredient-inputs {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ingredient-inputs input[type="text"],
+  .ingredient-inputs input[type="number"],
+  .ingredient-inputs select {
+    width: 100%;
+  }
+
+  #add-ingredient-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+.ing-flour-flag {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8rem;
+  color: #444;
+}
+
+.ingredient-table-wrapper {
+  margin-top: 10px;
+  overflow-x: auto;
+}
+
+.recipe-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  background-color: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.recipe-table th,
+.recipe-table td {
+  border-bottom: 1px solid #eee;
+  padding: 6px 8px;
+  text-align: left;
+}
+
+.recipe-table thead {
+  background-color: #f1efe9;
+}
+
+.recipe-table th {
+  font-weight: 600;
+  color: #444;
+}
+
+.recipe-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.recipe-table td:nth-child(2),
+.recipe-table td:nth-child(3),
+.recipe-table td:nth-child(5) {
+  white-space: nowrap;
+}
+
+.recipe-table .empty-row {
+  text-align: center;
+  color: #999;
+}
+
+/* 頂部滑出目錄列 */
+.top-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 52px;
+  background: rgba(255, 255, 255, 0.92);
+  border-bottom: 1px solid #eee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+  backdrop-filter: blur(10px);
+  transform: translateY(-100%);
+  transition: transform 0.25s ease-out;
+}
+
+.top-nav.show {
+  transform: translateY(0);
+}
+
+.top-nav-inner {
+  max-width: 920px;
+  width: 100%;
+  padding: 0 16px;
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+}
+
+/* 頂部 tab 按鈕 */
+.tab-button.top-tab {
+  flex-shrink: 0;
+  border-radius: 999px;
+  border: 1px solid #ddd;
+  background-color: #fff;
+  padding: 6px 10px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.tab-button.top-tab.active {
+  background-color: #222;
+  color: #fff;
+  border-color: #222;
+}
+
+/* 側邊欄 + 遮罩 */
+.side-drawer {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 260px;
+  height: 100vh;
+  background-color: #ffffff;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+  transform: translateX(-100%);
+  transition: transform 0.25s ease-out;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  padding: 16px 12px;
+}
+
+.side-drawer.open {
+  transform: translateX(0);
+}
+
+.side-drawer-header h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.side-drawer-header p {
+  margin: 4px 0 12px;
+  font-size: 0.8rem;
+  color: #777;
+}
+
+.side-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* 側邊欄裡的 tab 按鈕 */
+.tab-button.side-tab {
+  width: 100%;
+  text-align: left;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  background-color: #fff;
+  padding: 8px 10px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.tab-button.side-tab.active {
+  background-color: #222;
+  color: #fff;
+  border-color: #222;
+}
+
+/* 側邊欄遮罩 */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease-out;
+  z-index: 900;
+}
+
+.backdrop.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* 右上角極簡「☰」icon */
+.menu-toggle {
+  position: absolute;
+  top: 10px;
+  right: 16px;
+  padding: 4px;
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  line-height: 1;
+  color: #555;
+  cursor: pointer;
+  z-index: 1300;
+}
+
+.menu-toggle:hover {
+  color: #111;
+}
+
+/* 🔎 篩選區 外層 */
+.filter-block {
+  margin-bottom: 12px;
+}
+
+/* 上面那條只有一顆小按鈕的 bar */
+.filter-toggle-bar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+/* 篩選按鈕的樣式（類似小 chip） */
+.filter-toggle-btn {
+  padding: 4px 10px;
+  font-size: 0.85rem;
+  border-radius: 999px;
+  border: 1px solid #ddd;
+  background: #fff;
+  cursor: pointer;
+}
+
+.filter-toggle-btn::before {
+  content: "🔍 ";
+}
+
+/* 真正放 input/select 的 filter panel */
+.filter-panel {
+  display: none;          /* 預設關閉 */
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: #faf7f2;
+  border: 1px solid #eee;
+}
+
+/* 打開時 */
+.filter-panel.show {
+  display: block;
+}
+
+/* 讓 filter 裡面的表單行距比較緊湊 */
+.filter-panel .form-row {
+  margin-bottom: 6px;
+}
+
+.filter-panel.open {
+  display: block;
+}
+
+/* 新增食譜底部按鈕區 */
+.add-new-recipe-bottom {
+  margin-top: 24px;
+  padding: 20px 0 10px;
+  text-align: center;
+}
+
+.add-new-recipe-bottom .primary-btn {
+  width: 80%;
+  max-width: 320px;
+  font-size: 1rem;
+  padding: 12px 20px;
+}
+
+/* RWD 小調整 */
+@media (min-width: 768px) {
+  .form-section {
+    margin-top: 20px;
+  }
+
+  .ingredient-inputs {
+    gap: 10px;
+  }
+}
+
+/* --- 食譜列表卡片右側的比例工具 --- */
+
+.recipe-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.recipe-title-block {
+  display: flex;
+  flex-direction: column;
+}
+
+.recipe-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.recipe-title-row .card-title {
+  margin-bottom: 0;
+}
+
+.recipe-title-row .ratio-small {
+  font-size: 0.75rem;
+  color: #999;
+}
+
+.ratio-box {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.ratio-input {
+  width: 60px;
+  padding: 4px 6px;
+  border-radius: 999px;
+  border: 1px solid #ddd;
+  font-size: 0.8rem;
+  text-align: right;
+  background-color: #fafafa;
+}
+
+.ratio-btn {
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: none;
+  font-size: 0.8rem;
+  background-color: #222;
+  color: #fff;
+  cursor: pointer;
+}
+
+.ratio-btn:hover {
+  opacity: 0.9;
+}
+
+/* Modal：新增 / 編輯食譜 */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease-out;
+  z-index: 1500;
+}
+
+.modal-backdrop.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.recipe-modal {
+  position: fixed;
+  inset: 0;
+  display: none;
+  justify-content: center;
+  align-items: flex-end;
+  z-index: 1600;
+  pointer-events: none;
+}
+
+.recipe-modal.show {
+  display: flex;
+  pointer-events: auto;
+}
+
+.recipe-modal-panel {
+  width: 100%;
+  max-width: 800px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background-color: #fff;
+  border-radius: 24px 24px 0 0;
+  box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.18);
+  padding: 16px 16px 24px;
+  transform: translateY(100%);
+  transition: transform 0.25s ease-out;
+}
+
+.recipe-modal.show .recipe-modal-panel {
+  transform: translateY(0);
+}
+
+.form-section-modal {
+  margin-top: 4px;
+}
+
+.view-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.icon-btn {
+  border: none;
+  background: transparent;
+  border-radius: 999px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  color: #666;
+  transition: background-color 0.15s ease, color 0.15s ease,
+    transform 0.1s ease, opacity 0.1s ease;
+}
+
+.icon-btn:hover {
+  background-color: #ededed;
+  color: #111;
+  transform: translateY(-1px);
+}
+
+.icon-btn:active {
+  transform: translateY(0);
+  opacity: 0.85;
+}
+
+@keyframes slideUpModal {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* iPad / 小平板 */
+@media (min-width: 768px) {
+  .app-shell {
+    max-width: 768px;
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+}
+
+/* 桌機 / 筆電 */
+@media (min-width: 1024px) {
+  .app-shell {
+    max-width: 920px;
+  }
+}
+
+/* swipe + pin 樣式 */
+
+.card-inner {
+  position: relative;
+  transition: transform 0.2s ease-out;
+}
+
+.card.swiped .card-inner {
+  transform: translateX(-96px);
+}
+
+.card-swipe-actions {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 8px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.16s ease-out;
+}
+
+.card.swiped .card-swipe-actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* 桌機版：hover 出現釘選 / 刪除，不滑動內容 */
+@media (hover: hover) and (pointer: fine) {
+  .card.swiped .card-inner {
+    transform: none;
+  }
+
+  .card:hover .card-swipe-actions {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .ratio-box {
+    margin-right: 70px;
+  }
+
+  .card-actions {
+    margin-right: 80px;
+  }
+}
+
+.equipment-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 10px;
+  background: #f9f9f9;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  border: 1px solid #e6e6e6;
+}
+
+.equipment-row span {
+  font-size: 14px;
+  color: #444;
+}
+
+/* 材料列左邊的刪除按鈕 */
+.ing-delete-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid #d0d0d0;
+  background: #fafafa;
+  font-size: 20px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  color: #666;
+
+  /* 微陰影 → 看起來更高級 */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: all 0.15s ease;
+}
+
+.ing-delete-btn:hover {
+  background: #eaeaea;
+  border-color: #bcbcbc;
+  color: #444;
+}
+
+.swipe-pin-btn,
+.swipe-delete-btn {
+  border: none;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.swipe-pin-btn {
+  background-color: #555;
+}
+
+.swipe-delete-btn {
+  background-color: #d22;
+}
+
+.pin-badge {
+  font-size: 0.8rem;
+  margin-right: 4px;
+}
+
+.filter-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.filter-bar input,
+.filter-bar select {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+/* ==== Filter 區塊樣式 ==== */
+
+.filter-block {
+  margin-bottom: 12px;
+}
+
+.filter-toggle-bar {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.filter-toggle-btn {
+  font-size: 0.9rem;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid #f1b768;
+  background: #fff7ec;
+  cursor: pointer;
+}
+
+/* 🔴 預設先關閉 filter-panel */
+.filter-panel {
+  display: none;
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #fff7ec;
+  border: 1px solid #f1d0a5;
+}
+
+/* 🟢 有 .open 才顯示 */
+.filter-panel.open {
+  display: block;
+}
+
+/* ---- 修正 新增 / 編輯食譜 modal 顯示 ---- */
+
+/* 整個彈出視窗一定要貼齊左右邊，不要超出畫面 */
+.recipe-modal {
+  left: 0;
+  right: 0;
+  width: 100%;
+}
+
+/* 內層白色那塊面板：寬度不要超過螢幕，超過高度時可以獨立捲動 */
+.recipe-modal-panel {
+  width: 100%;
+  max-width: 700px;                    /* 大螢幕時中間 700px，手機就是 100% */
+  margin: 0 auto;
+  box-sizing: border-box;
+
+  max-height: calc(100vh - 40px);      /* 不會高過螢幕 */
+  overflow-y: auto;                    /* 超出就可以上下滑 */
+  -webkit-overflow-scrolling: touch;   /* iPhone 捲動順一點 */
+}
+
+/* 保險：整個頁面不要出現左右捲動 */
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Header 裡面「新增食譜」按鈕區塊 */
+.app-header-actions {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+}
+
+.header-new-recipe-btn {
+  width: 100%;
+  max-width: 280px;
+  font-size: 0.95rem;
+  padding: 10px 18px;
+}
+
+/* 📌 底部固定導覽列 */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 66px;
+  background: #fff;
+  border-top: 1px solid #ddd;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 800;
+}
+
+.bottom-nav-btn {
+  flex: 1;
+  height: 100%;
+  border: none;
+  background: none;
+  padding: 6px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  color: #666;
+}
+
+.bottom-nav-btn .icon {
+  font-size: 1.4rem;
+  line-height: 1;
+  margin-bottom: 3px;
+}
+
+.bottom-nav-btn.active {
+  color: #222;
+  font-weight: 600;
+}
+
+body {
+  padding-bottom: 70px;  /* 避免底部內容被 nav 擋住 */
+}
+
+.steps-add-box {
+  display: flex;
+  gap: 10px;
+  margin: 12px 0;
+}
+
+#new-step-input {
+  flex: 1;
+  padding: 10px;
+  font-size: 16px;
+}
+
+#add-step-btn {
+  padding: 10px 16px;
+  background: #ffb347;
+  border: none;
+  color: white;
+  border-radius: 6px;
+  font-size: 16px;
+}
+
+.steps-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.step-item {
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  background: #f7f5f0;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.delete-step-btn {
+  background: none;
+  border: none;
+  color: #d9534f;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.view {
+  padding-bottom: calc(70px + 32px); /* 底部tab高度 + 額外空間 */
+}
+
+.steps-filter-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.steps-filter-btn {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid #ddd;
+  background: #fff;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.steps-filter-btn.active {
+  background: #ffb347;
+  border-color: #ffb347;
+  color: #fff;
+}
+
+.steps-add-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 12px 0 20px;
+}
+
+#new-step-module-title,
+#new-step-module-tags,
+#new-step-module-steps {
+  padding: 8px 10px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  font-family: inherit;
+}
+
+#add-step-module-btn {
+  align-self: flex-end;
+  padding: 8px 16px;
+  background: #ffb347;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #fff;
+  cursor: pointer;
+}
+
+.steps-modules-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.step-module-card {
+  background: #f7f5f0;
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.step-module-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.step-module-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.tag-badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid #ddd;
+}
+
+.step-module-steps {
+  margin: 8px 0;
+  padding-left: 20px;
+}
+
+.step-module-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.step-module-actions button {
+  border: none;
+  background: none;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.step-module-actions .delete-step-module-btn {
+  color: #d9534f;
+}
+.step-module-steps li {
+  margin: 4px 0;
+  line-height: 1.4;
+}
+.step-module-card {
+  border-bottom: 2px solid #e5e5e5;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+}
+
+/* ===== 流程庫刪除確認彈窗 ===== */
+
+.confirm-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 900;
+}
+
+.confirm-dialog {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 901;
+}
+
+.confirm-dialog.show,
+.confirm-backdrop.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.confirm-content {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 18px 20px;
+  width: calc(100% - 40px);
+  max-width: 340px;
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.18);
+}
+
+.confirm-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 8px;
+}
+
+.confirm-message {
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
+  color: #555;
+}
+
+.confirm-actions {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* 按鈕樣式可以沿用你原本的 secondary-btn，只補一個 danger-btn */
+.btn {
+  font-size: 14px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+}
+
+.secondary-btn {
+  background: #f3f3f3;
+  color: #333;
+}
+
+.danger-btn {
+  background: #e24b4b;
+  color: #fff;
+}
+
+.danger-btn:hover {
+  background: #cc3c3c;
+}
+
+/* === Tab indicator 小圓點 === */
+.bottom-tab {
+  position: relative;
+  padding-bottom: 14px; /* 保留空間給圓點 */
+}
+
+.bottom-tab::after {
+  content: "";
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  background: transparent;
+  border-radius: 50%;
+  transition: background 0.25s ease;
+}
+
+.bottom-tab.active::after {
+  background: #ff9f43; /* 你 App 的主題色，可改 */
+}
+
+/* 預設：手機優先 */
+.desktop-only {
+  display: none;
+}
+
+.mobile-only {
+  display: flex;
+}
+
+/* 上方 tabs 外觀 */
+.top-tabs {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin: 8px auto 12px;
+}
+
+.top-tabs .tab-btn {
+  flex: 0 0 auto;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: none;
+  background: #f5f5f5;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.top-tabs .tab-btn.active {
+  background: #ffb347;
+  color: #fff;
+}
+
+/* 底部 nav 原本樣式自己保留，只要確保 .bottom-nav 是 flex 就好 */
+
+/* 💻 螢幕比較寬時：顯示上方 tabs，隱藏底部 */
+@media (min-width: 900px) {
+  .desktop-only {
+    display: flex;
+  }
+
+  .mobile-only {
+    display: none;
+  }
+
+  /* 桌機版不用留給底部 nav 空間，可以取消多餘 padding-bottom */
+  .app-main {
+    padding-bottom: 0;
+  }
+}

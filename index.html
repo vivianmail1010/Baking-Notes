@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <title>烘焙紀錄小本本</title>
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  />
+  <!-- 顯示在瀏覽器的主題顏色 -->
+  <meta name="theme-color" content="#ffb347" />
+
+  <!-- iOS PWA 必備 -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="烘焙小本本" />
+
+  <!-- PWA manifest -->
+  <link rel="manifest" href="manifest.webmanifest" />
+
+  <!-- iOS 主畫面 icon -->
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- 流程庫刪除確認彈窗 -->
+  <div id="step-confirm-backdrop" class="confirm-backdrop"></div>
+
+  <div id="step-confirm-dialog" class="confirm-dialog">
+    <div class="confirm-content">
+      <h3 class="confirm-title">刪除流程模組？</h3>
+      <p class="confirm-message">
+        你確定要刪除這個流程模組嗎？<br />
+        刪除後就無法復原喔。
+      </p>
+      <div class="confirm-actions">
+        <button id="step-confirm-cancel" class="btn secondary-btn">
+          取消
+        </button>
+        <button id="step-confirm-ok" class="btn danger-btn">
+          刪除
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 📚 左側滑出目錄 -->
+  <aside class="side-drawer" id="side-drawer">
+    <div class="side-drawer-header">
+      <h2>烘焙小本本</h2>
+      <p>快速切換頁面</p>
+    </div>
+    <nav class="side-nav">
+      <button class="tab-button side-tab active" data-view="recipes-view">食譜庫</button>
+      <button class="tab-button side-tab" data-view="new-recipe-view">新增食譜</button>
+      <button class="tab-button side-tab" data-view="logs-view">烘焙紀錄</button>
+      <button class="tab-button side-tab" data-view="ratio-view">比例換算</button>
+      <button class="tab-button side-tab" data-view="ref-recipes-view">參考食譜</button>
+      <button class="tab-button side-tab" data-view="lab-notes-view">實驗筆記</button>
+      <button class="tab-button side-tab" data-view="steps-view">流程庫</button>
+    </nav>
+  </aside>
+
+  <!-- 側邊欄遮罩 -->
+  <div class="backdrop" id="backdrop"></div>
+
+  <!-- 🎛 App 主體 -->
+  <div class="app-shell">
+    <!-- 頂部標題區 + 右上角目錄 icon -->
+    <header class="app-header">
+      <button class="menu-toggle" id="menu-toggle" aria-label="開啟目錄">
+        ☰
+      </button>
+
+      <div class="app-header-card">
+        <div class="app-header-text">
+          <h1>烘焙紀錄小本本</h1>
+          <p class="subtitle">食譜整理 · 比例換算 · 烘焙實驗，一次搞定</p>
+        </div>
+
+       <!-- 💻 電腦版用：主題下面的四個目錄 -->
+      <nav class="top-tabs desktop-only">
+      <button class="tab-button active" data-view="recipes-view">主頁</button>
+      <button class="tab-button" data-view="ratio-view">比例</button>
+      <button class="tab-button" data-view="logs-view">雜記</button>
+      <button class="tab-button" data-view="steps-view">流程庫</button>
+    </nav>
+
+        <!-- 🔼 上方「新增食譜」按鈕 -->
+        <div class="app-header-actions">
+          <button
+            id="header-new-recipe-btn"
+            class="primary-btn header-new-recipe-btn"
+            type="button"
+          >
+            ➕ 新增食譜
+          </button>
+        </div>
+      </div>
+    </header>
+
+  <!-- 🧭 頂部固定目錄列（往下滑才會露出） -->
+  <header class="top-nav" id="top-nav">
+    <div class="top-nav-inner">
+      <button class="tab-button top-tab active" data-view="recipes-view">食譜庫</button>
+      <button class="tab-button top-tab" data-view="new-recipe-view">新增食譜</button>
+      <button class="tab-button top-tab" data-view="logs-view">烘焙紀錄</button>
+      <button class="tab-button top-tab" data-view="ratio-view">比例換算</button>
+      <button class="tab-button top-tab" data-view="ref-recipes-view">烘焙參考食譜</button>
+      <button class="tab-button top-tab" data-view="lab-notes-view">烘焙實驗筆記</button>
+      <button class="tab-button top-tab" data-view="steps-view">流程庫</button>
+    </div>
+  </header>  <!-- 👈 一定要有這個關閉 header -->
+
+  <!-- Main content（所有主頁 view） -->
+  <main class="app-main">
+
+
+    <!-- Main content（所有主頁 view） -->
+    <main class="app-main">
+      <!-- 🧁 食譜庫（主頁） -->
+      <section id="recipes-view" class="view active">
+        <h2 class="view-title">食譜庫</h2>
+
+        <!-- 🧩 快速分類 Tab -->
+        <div class="recipe-category-tabs">
+          <button
+            type="button"
+            class="recipe-category-tab active"
+            data-cat=""
+          >
+            全部
+          </button>
+          <button
+            type="button"
+            class="recipe-category-tab"
+            data-cat="餅乾"
+          >
+            餅乾
+          </button>
+          <button
+            type="button"
+            class="recipe-category-tab"
+            data-cat="蛋糕"
+          >
+            蛋糕
+          </button>
+          <button
+            type="button"
+            class="recipe-category-tab"
+            data-cat="麵包"
+          >
+            麵包
+          </button>
+          <button
+            type="button"
+            class="recipe-category-tab"
+            data-cat="塔 / 派"
+          >
+            塔 / 派
+          </button>
+          <button
+            type="button"
+            class="recipe-category-tab"
+            data-cat="其他"
+          >
+            其他
+          </button>
+        </div>
+
+        <!-- 🔎 食譜庫 Filter 區（可收合） -->
+        <div class="filter-block">
+          <div class="filter-toggle-bar">
+            <button
+              type="button"
+              id="toggle-recipe-filter"
+              class="filter-toggle-btn"
+            >
+              篩選
+            </button>
+          </div>
+
+          <div id="recipe-filter-panel" class="filter-panel">
+            <div class="form-row">
+              <label for="filter-recipe-search">關鍵字</label>
+              <input
+                type="text"
+                id="filter-recipe-search"
+                placeholder="輸入食譜名稱關鍵字..."
+              />
+            </div>
+
+            <div class="form-row">
+              <label for="filter-recipe-category">分類</label>
+              <select id="filter-recipe-category">
+                <option value="">全部</option>
+                <option value="麵包">麵包</option>
+                <option value="蛋糕">蛋糕</option>
+                <option value="餅乾">餅乾</option>
+                <option value="塔 / 派">塔 / 派</option>
+                <option value="其他">其他</option>
+              </select>
+            </div>
+
+            <div class="form-row">
+              <label for="filter-recipe-source-type">來源類型</label>
+              <select id="filter-recipe-source-type">
+                <option value="">全部</option>
+                <option value="personal">自己研發 / 家用版本</option>
+                <option value="pro">專業師傅 / 烘焙老師</option>
+                <option value="book">烘焙書 / 出版品</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- 食譜列表 -->
+        <div id="recipe-list" class="card-list"></div>
+      </section>
+
+      <!-- 📒 烘焙紀錄 -->
+      <section id="logs-view" class="view">
+        <h2 class="view-title">烘焙紀錄</h2>
+
+        <!-- 🔎 烘焙紀錄 Filter 區 -->
+        <div class="filter-block">
+          <div class="filter-toggle-bar">
+            <button
+              type="button"
+              id="toggle-log-filter"
+              class="filter-toggle-btn"
+            >
+              篩選
+            </button>
+          </div>
+
+          <div id="log-filter-panel" class="filter-panel">
+            <div class="form-row">
+              <label for="filter-log-search">關鍵字</label>
+              <input
+                type="text"
+                id="filter-log-search"
+                placeholder="食譜名稱 / 口感備註..."
+              />
+            </div>
+
+            <div class="form-row">
+              <label for="filter-log-rating">評分</label>
+              <select id="filter-log-rating">
+                <option value="">不限</option>
+                <option value="5">只看 5 分</option>
+                <option value="4">≥ 4 分</option>
+                <option value="3">≥ 3 分</option>
+              </select>
+            </div>
+
+            <div class="form-row">
+              <label for="filter-log-date">日期</label>
+              <input type="date" id="filter-log-date" />
+            </div>
+          </div>
+        </div>
+
+        <!-- 紀錄列表 -->
+        <div id="log-list" class="card-list"></div>
+
+        <!-- 新增紀錄表單 -->
+        <section class="form-section">
+          <h3>新增烘焙紀錄</h3>
+          <form id="log-form">
+            <div class="form-row">
+              <label>日期</label>
+              <input type="date" id="log-date" required />
+            </div>
+
+            <div class="form-row">
+              <label>食譜名稱（文字先輸入就好）</label>
+              <input
+                type="text"
+                id="log-recipe-name"
+                required
+                placeholder="選用哪個食譜 / 版本"
+              />
+            </div>
+
+            <div class="form-row">
+              <label>版本 / 備註</label>
+              <input
+                type="text"
+                id="log-variant"
+                placeholder="例如：V2 減糖 + 加湯種"
+              />
+            </div>
+
+            <div class="form-row">
+              <label>種類</label>
+              <input
+                id="log-type"
+                type="text"
+                class="text-input"
+                placeholder="例如：餅乾／蛋糕／麵包"
+              />
+            </div>
+
+            <div class="form-row">
+              <label>設備 / 烤箱設定</label>
+              <textarea
+                id="log-oven"
+                rows="2"
+                placeholder="Breville 家用烤箱，上火 190 / 下火 200，30 分鐘"
+              ></textarea>
+            </div>
+
+            <div class="form-row">
+              <label>成品評分（1–5）</label>
+              <input
+                type="number"
+                id="log-rating"
+                min="1"
+                max="5"
+                step="0.5"
+              />
+            </div>
+
+            <div class="form-row">
+              <label>口感 / 味道描述</label>
+              <textarea
+                id="log-notes"
+                rows="3"
+                placeholder="口感、濕度、甜度、香氣…"
+              ></textarea>
+            </div>
+
+            <div class="form-row">
+              <label>下次要調整什麼？</label>
+              <textarea
+                id="log-next"
+                rows="3"
+                placeholder="烤久 2 分鐘、換粉、調整水量…"
+              ></textarea>
+            </div>
+
+            <button type="submit" class="primary-btn">儲存紀錄</button>
+          </form>
+        </section>
+      </section>
+
+      <!-- 🔢 比例換算（獨立頁面） -->
+      <section id="ratio-view" class="view">
+        <h2 class="view-title">比例換算</h2>
+
+        <!-- 🔄 上：單位換算 -->
+        <section class="form-section">
+          <h3>單位換算</h3>
+
+          <div class="form-row">
+            <label>數值</label>
+            <input type="number" id="unit-value" step="0.01" placeholder="例如：1" />
+          </div>
+
+          <div class="form-row">
+            <label>從什麼單位</label>
+            <select id="unit-from">
+              <option value="g">g（重量）</option>
+              <option value="kg">kg（重量）</option>
+              <option value="oz">oz（盎司）</option>
+              <option value="lb">lb（磅）</option>
+              <option value="ml">ml（容量）</option>
+              <option value="l">L（容量）</option>
+              <option value="cup">cup（容量）</option>
+              <option value="tbsp">tbsp（大匙）</option>
+              <option value="tsp">tsp（小匙）</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <label>換成什麼單位</label>
+            <select id="unit-to">
+              <option value="g">g（重量）</option>
+              <option value="kg">kg（重量）</option>
+              <option value="oz">oz（盎司）</option>
+              <option value="lb">lb（磅）</option>
+              <option value="ml">ml（容量）</option>
+              <option value="l">L（容量）</option>
+              <option value="cup">cup（容量）</option>
+              <option value="tbsp">tbsp（大匙）</option>
+              <option value="tsp">tsp（小匙）</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <label>食材（用在 g ↔ ml / cup 換算時）</label>
+            <select id="unit-ingredient">
+              <option value="water">通用 / 水類（1ml ≒ 1g）</option>
+              <option value="milk">牛奶</option>
+              <option value="flour">麵粉（中筋 / 高筋）</option>
+              <option value="sugar">細砂糖</option>
+              <option value="powderedSugar">糖粉</option>
+              <option value="butter">奶油</option>
+            </select>
+          </div>
+
+          <div class="quick-unit-row">
+            <button
+              type="button"
+              class="quick-unit-btn"
+              data-value="1"
+              data-from="cup"
+              data-to="g"
+              data-ingredient="flour"
+            >
+              1 cup 麵粉 → g
+            </button>
+
+            <button
+              type="button"
+              class="quick-unit-btn"
+              data-value="1"
+              data-from="cup"
+              data-to="g"
+              data-ingredient="sugar"
+            >
+              1 cup 砂糖 → g
+            </button>
+
+            <button
+              type="button"
+              class="quick-unit-btn"
+              data-value="1"
+              data-from="cup"
+              data-to="g"
+              data-ingredient="butter"
+            >
+              1 cup 奶油 → g
+            </button>
+
+            <button
+              type="button"
+              class="quick-unit-btn"
+              data-value="240"
+              data-from="ml"
+              data-to="cup"
+              data-ingredient="water"
+            >
+              240 ml → cup
+            </button>
+          </div>
+
+          <button type="button" class="secondary-btn" id="unit-convert-btn">
+            換算
+          </button>
+
+          <div class="form-row">
+            <label>結果</label>
+            <input
+              type="text"
+              id="unit-result"
+              readonly
+              placeholder="結果會顯示在這裡"
+            />
+          </div>
+
+          <p class="helper-text">
+            ✅ 同類單位（g ↔ kg, ml ↔ cup）會做純單位換算。<br />
+            ✅ 重量 ↔ 容量（例如 g ↔ ml / cup）會依照上面的「食材」密度幫你換算。
+          </p>
+        </section>
+
+        <!-- 📐 下：比例換算小工具 -->
+        <section class="form-section">
+          <h3>比例換算小工具</h3>
+
+          <div class="form-row">
+            <label>原本數值（例如：180）</label>
+            <input
+              type="number"
+              id="ratio-base"
+              step="0.01"
+              placeholder="原本克數 / ml / 份量數字"
+            />
+          </div>
+
+          <div class="form-row">
+            <label>倍率（例如：1.5 倍、0.75 倍）</label>
+            <input
+              type="number"
+              id="ratio-multiplier"
+              step="0.01"
+              placeholder="做 1.5 倍就輸入 1.5"
+            />
+          </div>
+
+          <div class="form-row">
+            <label>結果</label>
+            <input
+              type="text"
+              id="ratio-result"
+              readonly
+              placeholder="按下計算後會顯示這裡"
+            />
+          </div>
+
+          <button type="button" class="secondary-btn" id="ratio-calc-btn">
+            計算
+          </button>
+
+          <p class="helper-text">
+            用法範例：原本牛奶 180g，要做 1.5 倍 → 上面輸入 180 和 1.5，就可以把結果（270）抄回材料表。
+          </p>
+        </section>
+      </section>
+
+      <!-- 📚 參考食譜 -->
+      <section id="ref-recipes-view" class="view">
+        <h2 class="view-title">參考食譜</h2>
+
+        <!-- 🔎 參考食譜 Filter 區 -->
+        <div class="filter-block">
+          <div class="filter-toggle-bar">
+            <button
+              type="button"
+              id="toggle-ref-filter"
+              class="filter-toggle-btn"
+            >
+              篩選
+            </button>
+          </div>
+
+          <div id="ref-filter-panel" class="filter-panel">
+            <div class="form-row">
+              <label for="filter-ref-search">關鍵字</label>
+              <input
+                type="text"
+                id="filter-ref-search"
+                placeholder="食譜名稱 / 來源..."
+              />
+            </div>
+
+            <div class="form-row">
+              <label for="filter-ref-category">分類</label>
+              <select id="filter-ref-category">
+                <option value="">全部</option>
+                <option value="麵包">麵包</option>
+                <option value="蛋糕">蛋糕</option>
+                <option value="餅乾">餅乾</option>
+                <option value="塔 / 派">塔 / 派</option>
+                <option value="其他">其他</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- 參考食譜列表 -->
+        <div id="ref-recipe-list" class="card-list"></div>
+
+        <!-- 新增參考食譜表單 -->
+        <section class="form-section">
+          <h3>新增參考食譜</h3>
+
+          <form id="ref-recipe-form">
+            <div class="form-row">
+              <label>標題 / 名稱</label>
+              <input
+                type="text"
+                id="ref-title"
+                required
+                placeholder="例如：日本生吐司（三立老師版）"
+              />
+            </div>
+
+            <div class="form-row">
+              <label>來源／作者（選填）</label>
+              <input
+                type="text"
+                id="ref-source"
+                placeholder="例如：某某老師 YouTube / 某某烘焙書"
+              />
+            </div>
+
+            <div class="form-row">
+              <label>分類</label>
+              <select id="ref-category">
+                <option value="麵包">麵包</option>
+                <option value="蛋糕">蛋糕</option>
+                <option value="餅乾">餅乾</option>
+                <option value="塔 / 派">塔 / 派</option>
+                <option value="其他">其他</option>
+              </select>
+            </div>
+
+            <div class="form-row">
+              <label>連結（選填）</label>
+              <input
+                type="url"
+                id="ref-link"
+                placeholder="貼 IG / YouTube / Blog 連結"
+              />
+            </div>
+
+            <div class="form-row">
+              <label>備註 / 想試的點（選填）</label>
+              <textarea
+                id="ref-notes"
+                rows="3"
+                placeholder="例如：想試試看它的水合法、奶油比例或整形方式…"
+              ></textarea>
+            </div>
+
+            <button type="submit" class="primary-btn">儲存參考食譜</button>
+          </form>
+        </section>
+      </section>
+
+      <!-- 🔬 實驗筆記 -->
+      <section id="lab-notes-view" class="view">
+        <h2 class="view-title">實驗筆記</h2>
+
+        <!-- 🔎 實驗筆記 Filter 區 -->
+        <div class="filter-block">
+          <div class="filter-toggle-bar">
+            <button
+              type="button"
+              id="toggle-lab-filter"
+              class="filter-toggle-btn"
+            >
+              篩選
+            </button>
+          </div>
+
+          <div id="lab-filter-panel" class="filter-panel">
+            <div class="form-row">
+              <label for="filter-lab-search">關鍵字</label>
+              <input
+                type="text"
+                id="filter-lab-search"
+                placeholder="實驗主題 / 結果..."
+              />
+            </div>
+
+            <div class="form-row">
+              <label for="filter-lab-date">日期</label>
+              <input type="date" id="filter-lab-date" />
+            </div>
+          </div>
+        </div>
+
+        <!-- 實驗列表 -->
+        <div id="lab-list" class="card-list"></div>
+
+        <!-- 新增實驗筆記表單 -->
+        <section class="form-section">
+          <h3>新增實驗筆記</h3>
+
+          <form id="lab-form">
+            <div class="form-row">
+              <label>實驗主題</label>
+              <input
+                type="text"
+                id="lab-title"
+                required
+                placeholder="例如：吐司水量 70% vs 75%"
+              />
+            </div>
+
+            <div class="form-row">
+              <label>日期（選填）</label>
+              <input type="date" id="lab-date" />
+            </div>
+
+            <div class="form-row">
+              <label>本次調整的重點</label>
+              <textarea
+                id="lab-focus"
+                rows="3"
+                placeholder="例如：只改水量，其餘保持一樣；冷藏發酵時間拉長到 18 小時…"
+              ></textarea>
+            </div>
+
+            <div class="form-row">
+              <label>結果 / 口感描述</label>
+              <textarea
+                id="lab-result"
+                rows="3"
+                placeholder="例如：氣孔較大、口感更軟，但頂部有點塌…"
+              ></textarea>
+            </div>
+
+            <div class="form-row">
+              <label>下次要怎麼改？</label>
+              <textarea
+                id="lab-next"
+                rows="3"
+                placeholder="例如：下次把水量降回 72%，延長最後發酵 10 分鐘…"
+              ></textarea>
+            </div>
+
+            <button type="submit" class="primary-btn">儲存實驗筆記</button>
+          </form>
+        </section>
+      </section>
+
+      <!-- ⚙️ 流程庫（共用步驟） -->
+      <section id="steps-view" class="view">
+        <h2 class="view-title">流程庫（基礎流程模組）</h2>
+
+        <!-- 類型篩選 -->
+        <div class="steps-filter-bar">
+          <button class="steps-filter-btn active" data-tag="全部">全部</button>
+          <button class="steps-filter-btn" data-tag="餅乾">餅乾</button>
+          <button class="steps-filter-btn" data-tag="蛋糕">蛋糕</button>
+          <button class="steps-filter-btn" data-tag="麵包">麵包</button>
+          <button class="steps-filter-btn" data-tag="巧克力">巧克力</button>
+          <button class="steps-filter-btn" data-tag="馬卡龍">馬卡龍</button>
+          <button class="steps-filter-btn" data-tag="起司蛋糕">起司蛋糕</button>
+        </div>
+
+        <!-- 新增自己的流程模組 -->
+        <div class="steps-add-box">
+          <input
+            id="new-step-module-title"
+            type="text"
+            placeholder="流程標題，例如：『餅乾打發法（低糖版）』"
+          />
+          <input
+            id="new-step-module-tags"
+            type="text"
+            placeholder="適用類型（用逗號分隔：餅乾,蛋糕…）"
+          />
+          <textarea
+            id="new-step-module-steps"
+            rows="4"
+            placeholder="每一行代表一個步驟"
+          ></textarea>
+          <button id="add-step-module-btn">新增流程模組</button>
+        </div>
+
+        <!-- 流程模組列表 -->
+        <div id="steps-modules-list" class="steps-modules-list"></div>
+      </section>
+    </main>
+  </div>
+
+  <!-- 🔶 新增 / 編輯食譜：底部滑出視窗（Modal） -->
+  <div class="modal-backdrop" id="recipe-modal-backdrop"></div>
+
+  <section id="new-recipe-view" class="recipe-modal">
+    <div class="recipe-modal-panel">
+      <div class="view-header">
+        <h2 id="recipe-form-title">新增食譜</h2>
+        <button
+          type="button"
+          class="icon-btn"
+          id="recipe-close-btn"
+          aria-label="關閉新增食譜"
+        >
+          ×
+        </button>
+      </div>
+      <p id="recipe-form-ratio" class="helper-text"></p>
+
+      <section class="form-section form-section-modal">
+        <form id="recipe-form">
+          <div class="form-row">
+            <label>食譜名稱</label>
+            <input
+              type="text"
+              id="recipe-name"
+              required
+              placeholder="例如：日式生吐司（牛奶版）"
+            />
+          </div>
+
+          <div class="form-row">
+            <label>分類</label>
+            <select id="recipe-category">
+              <option value="麵包">麵包</option>
+              <option value="蛋糕">蛋糕</option>
+              <option value="餅乾">餅乾</option>
+              <option value="塔 / 派">塔 / 派</option>
+              <option value="其他">其他</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <label>來源</label>
+            <input
+              type="text"
+              id="recipe-source"
+              placeholder="書名 / 網址 / 自改配方…"
+            />
+          </div>
+
+          <div class="form-row">
+            <label>來源類型</label>
+            <select id="recipe-source-type">
+              <option value="personal">自己研發 / 家用版本</option>
+              <option value="pro">專業師傅 / 烘焙老師</option>
+              <option value="book">烘焙書 / 專業出版品</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <label>專業來源名稱（選填）</label>
+            <input
+              type="text"
+              id="recipe-pro-author"
+              placeholder="例如：吳寶春、生吐司專書第 32 頁"
+            />
+          </div>
+
+          <div class="form-row">
+            <label>份量</label>
+            <input
+              type="text"
+              id="recipe-serving"
+              placeholder="例如：1條吐司（450g模）"
+            />
+          </div>
+
+          <div class="form-row">
+            <label>步驟 / 備註（選填）</label>
+            <textarea
+              id="recipe-steps"
+              rows="4"
+              placeholder="步驟 1：揉麵至薄膜…
+步驟 2：發酵 60 分鐘…
+或簡單記錄：『這個版本水量再多 5% 比較好吃』"
+            ></textarea>
+          </div>
+
+          <!-- 器材輸入區 -->
+          <div class="form-row">
+            <label>器材（可輸入多項）</label>
+            <div class="equipment-inputs">
+              <input
+                type="text"
+                id="equip-name"
+                placeholder="例如：鋼盆、矽膠刮刀、吐司模、烤盤、溫度計…"
+              />
+              <button type="button" class="secondary-btn" id="add-equip-btn">
+                加入器材
+              </button>
+            </div>
+          </div>
+
+          <div class="equipment-list" id="equipment-list">
+            <p class="empty-row">
+              目前還沒有器材，在上方輸入後按「加入器材」。
+            </p>
+          </div>
+
+          <!-- 材料表格輸入區 -->
+          <div class="form-row">
+            <label>材料（用表格新增）</label>
+            <div class="ingredient-inputs">
+              <input
+                type="text"
+                id="ing-name"
+                placeholder="材料名稱，例如：高筋麵粉"
+              />
+              <input
+                type="number"
+                id="ing-amount"
+                placeholder="重量"
+                step="1"
+                min="0"
+                inputmode="decimal"
+              />
+
+              <select id="ing-unit">
+                <option value="g">g</option>
+                <option value="ml">ml</option>
+                <option value="個">個</option>
+                <option value="">其他</option>
+              </select>
+
+              <label class="ing-flour-flag">
+                <input type="checkbox" id="ing-is-flour" />
+                設為主要比例基準
+              </label>
+
+              <button
+                type="button"
+                class="secondary-btn"
+                id="add-ingredient-btn"
+              >
+                加入材料
+              </button>
+            </div>
+          </div>
+
+          <div class="ingredient-table-wrapper">
+            <table class="recipe-table">
+              <thead>
+                <tr>
+                  <th style="width: 40px;"></th>
+                  <th>材料</th>
+                  <th>重量</th>
+                  <th>單位</th>
+                  <th>比例基準</th>
+                  <th>比例（基準 = 1）</th>
+                </tr>
+              </thead>
+              <tbody id="ingredient-table-body">
+                <tr>
+                  <td colspan="6" class="empty-row">
+                    目前還沒有材料，在上方輸入後按「加入材料」。
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="form-actions">
+            <button
+              type="button"
+              class="secondary-btn"
+              id="recipe-cancel-edit"
+              style="display: none;"
+            >
+              取消編輯
+            </button>
+            <button type="submit" class="primary-btn" id="recipe-submit-btn">
+              儲存食譜
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </section>
+
+<!-- 📱 手機用底部導航（桌機會被 CSS 隱藏） -->
+<nav class="bottom-nav mobile-only">
+  <button class="bottom-nav-btn" data-view="recipes-view">
+    <span>主頁</span>
+  </button>
+  <button class="bottom-nav-btn" data-view="ratio-view">
+    <span>比例</span>
+  </button>
+  <button class="bottom-nav-btn" data-view="logs-view">
+    <span>雜記</span>
+  </button>
+  <button class="bottom-nav-btn" data-view="steps-view">
+    <span>流程庫</span>
+  </button>
+</nav>
+
+  <!-- JS -->
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
