@@ -18,8 +18,10 @@ body {
   color: #222;
 }
 
-body {
-  overscroll-behavior-x: none;
+.view {
+  height: calc(100vh - 160px);  /* 扣掉上方導航 + 下方 tab */
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 /* App 容器 */
@@ -1084,12 +1086,6 @@ textarea {
   -webkit-overflow-scrolling: touch;   /* iPhone 捲動順一點 */
 }
 
-/* 保險：整個頁面不要出現左右捲動 */
-html, body {
-  max-width: 100%;
-  overflow-x: hidden;
-}
-
 /* Header 裡面「新增食譜」按鈕區塊 */
 .app-header-actions {
   margin-top: 10px;
@@ -1142,10 +1138,6 @@ html, body {
 .bottom-nav-btn.active {
   color: #222;
   font-weight: 600;
-}
-
-body {
-  padding-bottom: 70px;  /* 避免底部內容被 nav 擋住 */
 }
 
 .steps-add-box {
@@ -1468,4 +1460,79 @@ body {
   .app-main {
     padding-bottom: 0;
   }
+}
+
+/* 🖥️ 預設維持桌機版：什麼都不動 */
+
+/* 📱 手機版調整：螢幕寬度小於 768px 時套用 */
+@media (max-width: 768px) {
+
+  /* 1. 手機版隱藏上方的目錄列（頂部那排「首頁 / 比例 / 雜記 / 流程庫」） */
+  .top-nav {
+    display: none;
+  }
+
+  /* 2. 手機版把底部 tab 往上挪一點 + 固定在畫面底部上方 */
+  .bottom-tabs {
+    position: fixed;
+    left: 0;
+    right: 0;
+
+    /* 往上抬一點，避免被 iPhone 底部手勢區吃掉 */
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+
+    /* 如果你的 app 有最大寬度，可以加這行讓它置中（沒有就刪掉） */
+    max-width: 768px;
+    margin: 0 auto;
+
+    z-index: 100; /* 確保蓋在內容上面 */
+  }
+
+  /* 3. 內容區下面留空間，不要被底部 tab 擋住 */
+  .app-main {
+    padding-bottom: 100px;  /* 可依實際高度改成 80~120px */
+  }
+}
+
+.step-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.step-number {
+  font-weight: bold;
+  font-size: 16px;
+  width: 28px;
+  text-align: right;
+}
+
+.step-input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 15px;
+  min-height: 40px;
+}
+
+.delete-step {
+  background: #eee;
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.recipe-preview-steps {
+  margin: 4px 0 0;
+  padding-left: 1.4em;
+}
+
+.recipe-preview-steps li {
+  font-size: 0.85rem;
+  line-height: 1.4;
 }

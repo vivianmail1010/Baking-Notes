@@ -10,6 +10,11 @@
   <!-- 顯示在瀏覽器的主題顏色 -->
   <meta name="theme-color" content="#ffb347" />
 
+  <!-- 給 iOS Safari 用 -->
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<!-- 給 Chrome / Android -->
+<meta name="mobile-web-app-capable" content="yes" />
+
   <!-- iOS PWA 必備 -->
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -306,12 +311,12 @@
 
             <div class="form-row">
               <label>設備 / 烤箱設定</label>
-              <textarea
-                id="log-oven"
-                rows="2"
-                placeholder="Breville 家用烤箱，上火 190 / 下火 200，30 分鐘"
-              ></textarea>
-            </div>
+           <div id="steps-container">
+           <!-- 動態步驟會插入在這裡 -->
+          </div>
+
+            <button id="add-step-btn" type="button">＋ 新增步驟</button>
+
 
             <div class="form-row">
               <label>成品評分（1–5）</label>

@@ -35,6 +35,7 @@ function closeStepDeleteConfirm() {
 }
 
 // --------- 預設會出現在 App 裡的食譜（基底配方 / 常用配方） ---------
+// --------- 預設會出現在 App 裡的食譜（基底配方 / 常用配方） ---------
 const defaultRecipes = [
   {
     id: "base-butter-cookie-dough",    // 固定 ID，避免重複
@@ -53,8 +54,38 @@ const defaultRecipes = [
     ],
     baselineIngredientId: null,
     equipment: []
+  },
+
+  // ⬇️ 預設食譜例子：巧克力磅蛋糕
+  {
+    id: "choco-pound-cake",              // 全英文＋有意義，保持全 app 唯一
+    name: "巧克力磅蛋糕",
+    category: "蛋糕",                    // 要跟你上面「分類按鈕」一致：餅乾 / 蛋糕 / 麵包 / 塔 / 派 / 其他
+    sourceType: "personal",
+    serving: "一條模（約8片）",
+    notes: "濕潤款巧克力磅蛋糕，適合加堅果或巧克力豆。",
+    ingredients: [
+      { name: "無鹽奶油（室溫）", amount: 120, unit: "g" },
+      { name: "細砂糖", amount: 90, unit: "g" },
+      { name: "全蛋", amount: 2, unit: "顆" },       // 顆數用顆，換算自己心裡知道約 100g
+      { name: "低筋麵粉", amount: 120, unit: "g" },
+      { name: "可可粉", amount: 20, unit: "g" },
+      { name: "泡打粉", amount: 3, unit: "g" },
+      { name: "牛奶", amount: 40, unit: "g" },       // 這裡用 g / ml 都可以，反正是 1:1
+      { name: "黑巧克力豆（可省略）", amount: 40, unit: "g" },
+    ],
+    steps: `1. 烤箱預熱 170°C，上下火。磅蛋糕模抹油鋪紙。
+2. 奶油打發到泛白，分次加入細砂糖打至蓬鬆。
+3. 分2～3次加入打散的蛋液，每次都要拌到完全乳化。
+4. 將低筋麵粉、可可粉、泡打粉一起過篩，分兩次拌入。
+5. 中間交替加入牛奶，翻拌到沒有粉粒（不要過度攪拌）。
+6. 拌入巧克力豆，入模，抹平表面。
+7. 170°C 烤約 40～45 分鐘，竹籤插入無沾黏即可。`,
+    baselineIngredientId: null,
+    equipment: []
   }
 ];
+
 
 // 把預設食譜轉成真正放在 recipes 陣列裡的格式
 function buildRecipeFromDefault(def) {
@@ -594,7 +625,7 @@ function renderRecipeList(listOverride) {
 
     const ings = Array.isArray(recipe.ingredients) ? recipe.ingredients : [];
 
-    function renderPreview() {
+      function renderPreview() {
       preview.innerHTML = "";
       const ratioVal =
         typeof recipe.ratio === "number" && recipe.ratio > 0 ? recipe.ratio : 1;
@@ -653,7 +684,7 @@ function renderRecipeList(listOverride) {
         preview.appendChild(eqRow);
       }
 
-      // 步驟 / 備註
+      // 步驟 / 備註（1. 2. 3. 清單）
       const stepsRow = document.createElement("div");
       stepsRow.className = "recipe-preview-row";
 
@@ -661,20 +692,52 @@ function renderRecipeList(listOverride) {
       stepsLabel.className = "recipe-preview-label";
       stepsLabel.textContent = "步驟 / 備註：";
 
-      const stepsText = document.createElement("span");
-      stepsText.className = "recipe-preview-text";
-
       if (recipe.steps && recipe.steps.trim()) {
-        const s = recipe.steps.trim().replace(/\s+/g, " ");
-        stepsText.textContent = s.length > 100 ? s.slice(0, 100) + "…" : s;
+        const lines = recipe.steps
+          .split("\n")
+          .map((s) => s.trim())
+          .filter(Boolean);
+
+        if (lines.length === 1) {
+          // 只有一行 → 當備註
+          const stepsText = document.createElement("span");
+          stepsText.className = "recipe-preview-text";
+          const s = lines[0];
+          stepsText.textContent = s.length > 120 ? s.slice(0, 120) + "…" : s;
+
+          stepsRow.appendChild(stepsLabel);
+          stepsRow.appendChild(stepsText);
+        } else {
+          // 多行 → 1. 2. 3. 條列
+          const list = document.createElement("ol");
+          list.className = "recipe-preview-steps";
+
+          const maxLines = 4; // 最多預覽前 4 步
+          lines.slice(0, maxLines).forEach((line) => {
+            const li = document.createElement("li");
+            li.textContent = line;
+            list.appendChild(li);
+          });
+
+          if (lines.length > maxLines) {
+            const more = document.createElement("li");
+            more.textContent = `…（共 ${lines.length} 步）`;
+            list.appendChild(more);
+          }
+
+          stepsRow.appendChild(stepsLabel);
+          stepsRow.appendChild(list);
+        }
       } else {
+        const stepsText = document.createElement("span");
+        stepsText.className = "recipe-preview-text";
         stepsText.textContent = "尚未輸入步驟或備註";
+        stepsRow.appendChild(stepsLabel);
+        stepsRow.appendChild(stepsText);
       }
 
-      stepsRow.appendChild(stepsLabel);
-      stepsRow.appendChild(stepsText);
       preview.appendChild(stepsRow);
-    }
+    } // ←←← 這個大括號一定要有！
 
     ratioBtn.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -1048,7 +1111,8 @@ function startEditRecipe(recipeId) {
   const sourceTypeEl = document.getElementById("recipe-source-type");
   const proAuthorEl = document.getElementById("recipe-pro-author");
   const servingEl = document.getElementById("recipe-serving");
-  const stepsEl = document.getElementById("recipe-steps");
+  // ⚠️ 不再用 textarea 讀步驟了，這行可以拿掉：
+  // const stepsEl = document.getElementById("recipe-steps");
 
   if (!nameEl) return;
 
@@ -1058,7 +1122,14 @@ function startEditRecipe(recipeId) {
   sourceTypeEl.value = recipe.sourceType || "personal";
   proAuthorEl.value = recipe.proAuthor || "";
   servingEl.value = recipe.serving || "";
-  stepsEl.value = recipe.steps || "";
+
+  // ✅ 把原本存的多行步驟拆回陣列，給動態步驟區顯示
+  stepList = (recipe.steps || "")
+    .split("\n")
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  renderSteps();
 
   tempIngredients = (recipe.ingredients || []).map((ing) => ({ ...ing }));
   baselineIngredientId = recipe.baselineIngredientId || null;
@@ -1090,6 +1161,7 @@ function startEditRecipe(recipeId) {
 }
 
 // ---------- 新增 / 更新 食譜表單 ----------
+// ---------- 新增 / 更新 食譜表單 ----------
 function setupRecipeForm() {
   const form = document.getElementById("recipe-form");
   if (!form) return;
@@ -1110,6 +1182,17 @@ function setupRecipeForm() {
 
     renderIngredientTable();
     renderEquipmentList();
+
+    // ✅ 清空舊 textarea 步驟（如果還有）
+    const legacyStepsEl = document.getElementById("recipe-steps");
+    if (legacyStepsEl) legacyStepsEl.value = "";
+
+    // ✅ 清空動態步驟 & 重畫一行空的
+    stepList = [];
+    if (stepsContainer) {
+      stepsContainer.innerHTML = "";
+    }
+    addStep(); // 再生一個空的步驟欄位
 
     if (titleEl) titleEl.textContent = "新增食譜";
     if (submitBtn) submitBtn.textContent = "儲存食譜";
@@ -1135,12 +1218,26 @@ function setupRecipeForm() {
     const sourceTypeEl = document.getElementById("recipe-source-type");
     const proAuthorEl = document.getElementById("recipe-pro-author");
     const servingEl = document.getElementById("recipe-serving");
-    const stepsEl = document.getElementById("recipe-steps");
+    const legacyStepsEl = document.getElementById("recipe-steps"); // 舊 textarea（如果存在）
 
     const name = nameEl.value.trim();
     if (!name) {
       alert("請輸入食譜名稱");
       return;
+    }
+
+    // ✅ 先從新的動態步驟欄位抓資料
+    const stepInputs = document.querySelectorAll(".step-input");
+    const stepsFromUI = Array.from(stepInputs)
+      .map((el) => el.value.trim())
+      .filter((txt) => txt !== "");
+
+    let stepsText = stepsFromUI.join("\n");
+
+    // ✅ 如果畫面上沒有 .step-input（或你其實是打在舊 textarea 裡）
+    //   就改從 legacy textarea 讀
+    if (!stepsText && legacyStepsEl) {
+      stepsText = legacyStepsEl.value.trim();
     }
 
     const commonData = {
@@ -1150,7 +1247,7 @@ function setupRecipeForm() {
       sourceType: sourceTypeEl.value || "personal",
       proAuthor: proAuthorEl.value.trim(),
       serving: servingEl.value.trim(),
-      steps: stepsEl.value.trim(),
+      steps: stepsText, // ⭐ 不管新舊寫法，最後都進到這裡
       ingredients: tempIngredients.slice(),
       equipment: tempEquipment.slice(),
       baselineIngredientId
@@ -1484,10 +1581,12 @@ function setupRefRecipeForm() {
     e.preventDefault();
 
     const titleEl = document.getElementById("ref-title");
-    const sourceEl = document.getElementById("ref-source");
     const categoryEl = document.getElementById("ref-category");
+    const sourceEl = document.getElementById("ref-source");
     const linkEl = document.getElementById("ref-link");
     const notesEl = document.getElementById("ref-notes");
+
+    if (!titleEl) return;
 
     const title = titleEl.value.trim();
     if (!title) {
@@ -1499,10 +1598,10 @@ function setupRefRecipeForm() {
       id: createId(),
       createdAt: Date.now(),
       title,
-      source: (sourceEl.value || "").trim(),
-      category: categoryEl.value || "",
-      link: (linkEl.value || "").trim(),
-      notes: (notesEl.value || "").trim()
+      category: categoryEl ? categoryEl.value : "",
+      source: sourceEl ? sourceEl.value.trim() : "",
+      link: linkEl ? linkEl.value.trim() : "",
+      notes: notesEl ? notesEl.value.trim() : ""
     };
 
     refRecipes.push(ref);
@@ -1962,6 +2061,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setupEquipmentAdd();
   renderEquipmentList();
   setupRecipeForm();
+  setupStepEditor();
   renderRecipeList();
   setupRecipeFilters();
   setupRecipeCategoryTabs();
@@ -1998,3 +2098,89 @@ document.addEventListener("DOMContentLoaded", () => {
   // 底部導覽
   setupBottomNav();
 });
+
+// === 動態步驟（食譜表單用） ===
+
+// 全域陣列：目前表單裡的步驟文字
+let stepList = [];
+// 容器會在 setupStepEditor 裡面抓
+let stepsContainer = null;
+
+function renderSteps() {
+  if (!stepsContainer) return;
+
+  stepsContainer.innerHTML = "";
+
+  // 沒有步驟就不畫東西（exitRecipeForm 會再塞一行空白）
+  if (!stepList.length) return;
+
+  stepList.forEach((text, index) => {
+    const row = document.createElement("div");
+    row.className = "step-row";
+
+    row.innerHTML = `
+      <div class="step-number">${index + 1}</div>
+      <textarea class="step-input" data-index="${index}" placeholder="輸入步驟內容...">${text}</textarea>
+      <button type="button" class="delete-step" data-index="${index}">－</button>
+    `;
+
+    stepsContainer.appendChild(row);
+  });
+
+  bindStepEvents();
+}
+
+function bindStepEvents() {
+  const inputs = document.querySelectorAll(".step-input");
+  const deletes = document.querySelectorAll(".delete-step");
+
+  // 文字輸入 → 同步回 stepList
+  inputs.forEach((input) => {
+    input.addEventListener("input", (e) => {
+      const idx = Number(e.target.dataset.index);
+      if (!Number.isNaN(idx)) {
+        stepList[idx] = e.target.value;
+      }
+    });
+
+    // 按 Enter 自動新增下一步
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        addStep();
+      }
+    });
+  });
+
+  // 刪除某一步
+  deletes.forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      const idx = Number(e.target.dataset.index);
+      if (Number.isNaN(idx)) return;
+      stepList.splice(idx, 1);
+      renderSteps();
+    });
+  });
+}
+
+// 加一個新步驟（預設可以給空字串或預設文字）
+function addStep(defaultText = "") {
+  stepList.push(defaultText);
+  renderSteps();
+}
+
+// 初始化步驟編輯器，給 DOMContentLoaded 呼叫
+function setupStepEditor() {
+  stepsContainer = document.getElementById("steps-container");
+  const addStepBtn = document.getElementById("add-step-btn");
+
+  if (!stepsContainer || !addStepBtn) return;
+
+  // 一開始至少要有一行
+  if (!stepList.length) {
+    stepList.push("");
+  }
+  renderSteps();
+
+  addStepBtn.addEventListener("click", () => addStep());
+}
