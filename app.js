@@ -35,7 +35,6 @@ function closeStepDeleteConfirm() {
 }
 
 // --------- 預設會出現在 App 裡的食譜（基底配方 / 常用配方） ---------
-// --------- 預設會出現在 App 裡的食譜（基底配方 / 常用配方） ---------
 const defaultRecipes = [
   {
     id: "base-butter-cookie-dough",    // 固定 ID，避免重複
