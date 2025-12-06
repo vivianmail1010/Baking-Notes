@@ -1826,6 +1826,7 @@ function setupStepEditor() {
 
   addStepBtn.addEventListener("click", () => addStep());
 }
+
 // ---------- 食譜列表（支援字串步驟 / 陣列步驟） ----------
 function renderRecipeList(listOverride) {
   const list = Array.isArray(listOverride) ? listOverride : recipes;
@@ -1858,11 +1859,10 @@ function renderRecipeList(listOverride) {
       startEditRecipe(recipe.id);
     });
 
-    // 內部容器
     const inner = document.createElement("div");
     inner.className = "card-inner";
 
-    // 標題列
+    // ---- 標題列（左：名稱；右：釘選）----
     const titleRow = document.createElement("div");
     titleRow.className = "card-title-row";
 
@@ -1875,7 +1875,6 @@ function renderRecipeList(listOverride) {
     pinBtn.className = "pin-btn";
     pinBtn.textContent = recipe.pinned ? "★" : "☆";
     pinBtn.title = recipe.pinned ? "取消釘選" : "釘選這個食譜";
-
     pinBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       toggleRecipePin(recipe.id);
@@ -1884,7 +1883,7 @@ function renderRecipeList(listOverride) {
     titleRow.appendChild(titleEl);
     titleRow.appendChild(pinBtn);
 
-    // meta 行：分類 / 來源
+    // ---- meta 行：分類 / 份量 / 來源 ----
     const meta = document.createElement("div");
     meta.className = "card-meta";
     const parts = [];
@@ -1893,17 +1892,39 @@ function renderRecipeList(listOverride) {
     if (recipe.source) parts.push(recipe.source);
     meta.textContent = parts.join(" · ");
 
-    // 步驟預覽區
-    const stepsWrap = document.createElement("div");
-    stepsWrap.className = "card-steps";
+    // ---- 步驟預覽（完整顯示）----
+    const preview = document.createElement("div");
+    preview.className = "recipe-preview";
+
+    // 來源 + 份量簡短文字
+    if (recipe.notes) {
+      const notesRow = document.createElement("div");
+      notesRow.className = "recipe-preview-row";
+
+      const notesLabel = document.createElement("span");
+      notesLabel.className = "recipe-preview-label";
+      notesLabel.textContent = "備註：";
+
+      const notesText = document.createElement("span");
+      notesText.className = "recipe-preview-text";
+      notesText.textContent = recipe.notes;
+
+      notesRow.appendChild(notesLabel);
+      notesRow.appendChild(notesText);
+      preview.appendChild(notesRow);
+    }
+
+    // 步驟 / 備註：支援字串或陣列
+    const stepsRow = document.createElement("div");
+    stepsRow.className = "recipe-preview-row";
+
+    const stepsLabel = document.createElement("span");
+    stepsLabel.className = "recipe-preview-label";
+    stepsLabel.textContent = "步驟 / 備註：";
 
     const rawSteps = recipe.steps;
     let lines = [];
 
-    // 支援三種格式：
-    // 1) 字串（用 \n 分行）
-    // 2) 陣列字串：["步驟1", "步驟2"]
-    // 3) 陣列物件：[{ text: "步驟1" }, { text: "步驟2" }]
     if (Array.isArray(rawSteps)) {
       lines = rawSteps
         .map((s) => {
@@ -1920,26 +1941,42 @@ function renderRecipeList(listOverride) {
     }
 
     if (lines.length) {
-      const ul = document.createElement("ul");
-      ul.className = "recipe-steps-list";
-      lines.forEach((line) => {
-        const li = document.createElement("li");
-        li.textContent = line;
-        ul.appendChild(li);
-      });
-      stepsWrap.appendChild(ul);
+      if (lines.length === 1) {
+        // 一行就當備註整段顯示
+        const stepsText = document.createElement("span");
+        stepsText.className = "recipe-preview-text";
+        stepsText.textContent = lines[0];
+        stepsRow.appendChild(stepsLabel);
+        stepsRow.appendChild(stepsText);
+      } else {
+        // 多行就 1. 2. 3. 全部列出
+        const listEl = document.createElement("ol");
+        listEl.className = "recipe-preview-steps";
+        lines.forEach((line) => {
+          const li = document.createElement("li");
+          li.textContent = line;
+          listEl.appendChild(li);
+        });
+        stepsRow.appendChild(stepsLabel);
+        stepsRow.appendChild(listEl);
+      }
     } else {
-      stepsWrap.textContent = "尚未輸入步驟";
-      stepsWrap.classList.add("empty");
+      const stepsText = document.createElement("span");
+      stepsText.className = "recipe-preview-text";
+      stepsText.textContent = "尚未輸入步驟或備註";
+      stepsRow.appendChild(stepsLabel);
+      stepsRow.appendChild(stepsText);
     }
+
+    preview.appendChild(stepsRow);
 
     inner.appendChild(titleRow);
     inner.appendChild(meta);
-    inner.appendChild(stepsWrap);
+    inner.appendChild(preview);
 
     card.appendChild(inner);
 
-    // 右滑刪除（跟參考食譜 / 實驗一樣風格）
+    // ---- 右滑刪除 ----
     const swipeActions = document.createElement("div");
     swipeActions.className = "card-swipe-actions";
 
