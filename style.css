@@ -1591,3 +1591,111 @@ textarea {
     margin: 0 0 16px 0;
   }
 }
+
+/* === 簡潔版食譜卡片樣式（覆蓋舊的）=== */
+
+/* 卡片本體：比較小、比較緊湊 */
+.card.recipe-card {
+  padding: 10px 12px;
+  border-radius: 14px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
+  border: 1px solid #eee;
+  margin: 0 0 10px 0;
+}
+
+/* 標題列：一行排好 → 左：名稱，右：小箭頭＋按鈕 */
+.card-title-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* 食譜名稱：吃掉左邊空間，超出用 … 收掉 */
+.card-title {
+  flex: 1;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 小箭頭：跟標題同一行，不要落在下一行 */
+.recipe-caret {
+  font-size: 0.75rem;
+  color: #bbb;
+  width: auto;
+  transform: rotate(-90deg);
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+/* 展開時箭頭往下 */
+.card.expanded .recipe-caret {
+  transform: rotate(0deg);
+  color: #777;
+}
+
+/* 右側的 ✎ / ★ 按鈕：小顆、圓形 chip */
+.icon-btn,
+.pin-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  border: none;
+  background: #f7f7f7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  padding: 0;
+  color: #666;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.icon-btn:hover,
+.pin-btn:hover {
+  background: #ececec;
+}
+
+/* meta 行（蛋糕 / 一條模）字再小一點、貼近標題 */
+.card-meta {
+  margin-top: 4px;
+  font-size: 0.8rem;
+  color: #777;
+}
+
+/* 步驟區：展開時才出現，字小一點 & 上面細線 */
+.card-steps {
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: 1px dashed #eee;
+  font-size: 0.8rem;
+}
+
+/* 步驟列表正常換行、不要太擠 */
+.recipe-steps-list {
+  padding-left: 1.2em;
+  margin: 0;
+}
+
+.recipe-steps-list li {
+  line-height: 1.4;
+  white-space: normal;
+}
+
+.recipe-ing-row {
+  display: flex;
+  gap: 10px;
+}
+
+.recipe-ing-row .ing-name {
+  flex: 0 0 140px;   /* 固定材料名稱欄寬，數字會自動右對齊 */
+  min-width: 140px;
+}
+
+.recipe-ing-row .ing-amt {
+  flex: 0 0 50px;    /* 數字欄寬固定，所有數字會上下排列整齊 */
+  text-align: right;
+  white-space: nowrap;
+}

@@ -527,6 +527,32 @@ function toggleRecipePin(recipeId) {
   renderRecipeList();
 }
 
+// 設定單一食譜的倍率（幾倍配方）
+function setRecipeRatio(recipeId, mult) {
+  const recipe = recipes.find((r) => r.id === recipeId);
+  if (!recipe) return;
+
+  if (!Number.isFinite(mult) || mult <= 0) {
+    alert("倍率請輸入大於 0 的數字");
+    return;
+  }
+
+  recipe.ratio = mult;
+  saveData();
+
+  // 如果此時正在編輯同一個食譜，順便更新提示文字＆材料表
+  if (editingRecipeId === recipeId) {
+    const ratioHint = document.getElementById("recipe-form-ratio");
+    if (ratioHint) {
+      ratioHint.textContent =
+        mult === 1
+          ? "目前倍率：x1（顯示原始配方份量）"
+          : `目前倍率：x${mult}（表格顯示的是放大後的材料重量，原始 1 倍配方已保留）`;
+    }
+    renderIngredientTable();
+  }
+}
+
 // ---------- 新增食譜頁：材料 ----------
 function renderIngredientTable() {
   const tbody = document.getElementById("ingredient-table-body");
@@ -1843,7 +1869,7 @@ function renderRecipeList(listOverride) {
     return;
   }
 
-  // 釘選在前，其他照建立時間新到舊
+  // 釘選在前，其餘依建立時間新到舊
   const sorted = list.slice().sort((a, b) => {
     if (a.pinned && !b.pinned) return -1;
     if (!a.pinned && b.pinned) return 1;
@@ -1854,38 +1880,47 @@ function renderRecipeList(listOverride) {
     const card = document.createElement("div");
     card.className = "card recipe-card";
 
-    // 點整張卡片 = 編輯食譜
-    card.addEventListener("click", () => {
-      startEditRecipe(recipe.id);
-    });
-
-    // 內部容器
     const inner = document.createElement("div");
     inner.className = "card-inner";
 
-    // 標題列
+    // ====== 標題列（名稱 + 小箭頭 + 編輯 + 星星） ======
     const titleRow = document.createElement("div");
     titleRow.className = "card-title-row";
+
+    const caret = document.createElement("span");
+    caret.className = "recipe-caret";
+    caret.textContent = "▾";
 
     const titleEl = document.createElement("div");
     titleEl.className = "card-title";
     titleEl.textContent = recipe.name || "未命名食譜";
+
+    const editBtn = document.createElement("button");
+    editBtn.type = "button";
+    editBtn.className = "icon-btn";
+    editBtn.title = "編輯食譜";
+    editBtn.textContent = "✎";
+    editBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      startEditRecipe(recipe.id);
+    });
 
     const pinBtn = document.createElement("button");
     pinBtn.type = "button";
     pinBtn.className = "pin-btn";
     pinBtn.textContent = recipe.pinned ? "★" : "☆";
     pinBtn.title = recipe.pinned ? "取消釘選" : "釘選這個食譜";
-
     pinBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       toggleRecipePin(recipe.id);
     });
 
+    titleRow.appendChild(caret);
     titleRow.appendChild(titleEl);
+    titleRow.appendChild(editBtn);
     titleRow.appendChild(pinBtn);
 
-    // meta 行：分類 / 來源
+    // ====== meta 行：分類 / 份量 / 來源 ======
     const meta = document.createElement("div");
     meta.className = "card-meta";
     const parts = [];
@@ -1894,17 +1929,119 @@ function renderRecipeList(listOverride) {
     if (recipe.source) parts.push(recipe.source);
     meta.textContent = parts.join(" · ");
 
-    // 步驟預覽區
+    // ====== 倍率列：幾倍配方 ======
+    const ratioRow = document.createElement("div");
+    ratioRow.className = "ratio-box";
+
+    const ratioLabel = document.createElement("span");
+    ratioLabel.style.fontSize = "0.8rem";
+
+    const ratioInput = document.createElement("input");
+    ratioInput.type = "number";
+    ratioInput.min = "0.1";
+    ratioInput.step = "0.1";
+    ratioInput.className = "ratio-input";
+    ratioInput.value =
+      typeof recipe.ratio === "number" && recipe.ratio > 0
+        ? recipe.ratio
+        : 1;
+
+    const ratioBtn = document.createElement("button");
+    ratioBtn.type = "button";
+    ratioBtn.className = "ratio-btn";
+    ratioBtn.textContent = "套用";
+
+    ratioInput.addEventListener("click", (e) => e.stopPropagation());
+    ratioBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const val = parseFloat(ratioInput.value);
+      if (!Number.isFinite(val) || val <= 0) {
+        alert("倍率請輸入大於 0 的數字");
+        return;
+      }
+      setRecipeRatio(recipe.id, val);
+      alert(
+        `已將「${recipe.name || "這個食譜"}」設定為 x${val}。\n` +
+          "開啟編輯畫面時，材料表會用這個倍率顯示。"
+      );
+    });
+
+    ratioRow.appendChild(ratioLabel);
+    ratioRow.appendChild(ratioInput);
+    ratioRow.appendChild(ratioBtn);
+
+    // ====== 材料區（小字、無 bullet，會顯示容量）=======
+    const ingWrap = document.createElement("div");
+    ingWrap.className = "card-ingredients";
+    ingWrap.style.fontSize = "0.8rem";
+    ingWrap.style.lineHeight = "1.4";
+
+    const ratio =
+      typeof recipe.ratio === "number" && recipe.ratio > 0
+        ? recipe.ratio
+        : 1;
+
+    if (Array.isArray(recipe.ingredients) && recipe.ingredients.length) {
+      const label = document.createElement("div");
+      label.className = "section-label";
+      label.textContent = "材料";
+      label.style.fontWeight = "600";
+      label.style.marginBottom = "2px";
+      ingWrap.appendChild(label);
+
+            recipe.ingredients.forEach((ing) => {
+        const row = document.createElement("div");
+        row.className = "recipe-ing-row";
+
+        let amountText = "";
+
+        const rawAmount = ing.amount;
+        const numeric = parseFloat(rawAmount);
+        if (Number.isFinite(numeric)) {
+          const finalAmount = numeric * ratio;
+          amountText = formatNumber(finalAmount) + (ing.unit || "");
+        } else if (
+          rawAmount !== undefined &&
+          rawAmount !== null &&
+          rawAmount !== ""
+        ) {
+          amountText = String(rawAmount) + (ing.unit || "");
+        }
+
+        // 左邊：名稱
+        const nameSpan = document.createElement("span");
+        nameSpan.className = "ing-name";
+        nameSpan.textContent = ing.name || "";
+
+        row.appendChild(nameSpan);
+
+        // 右邊：數字＋單位（有才顯示）
+        if (amountText) {
+          const amtSpan = document.createElement("span");
+          amtSpan.className = "ing-amt";
+          amtSpan.textContent = amountText;
+          row.appendChild(amtSpan);
+        }
+
+        ingWrap.appendChild(row);
+      });
+
+    } else {
+      ingWrap.textContent = "尚未輸入材料";
+      ingWrap.classList.add("empty");
+    }
+
+    // 一開始先收起
+    ingWrap.style.display = "none";
+
+
+    // ====== 步驟區 ======
     const stepsWrap = document.createElement("div");
     stepsWrap.className = "card-steps";
 
     const rawSteps = recipe.steps;
     let lines = [];
 
-    // 支援三種格式：
-    // 1) 字串（用 \n 分行）
-    // 2) 陣列字串：["步驟1", "步驟2"]
-    // 3) 陣列物件：[{ text: "步驟1" }, { text: "步驟2" }]
     if (Array.isArray(rawSteps)) {
       lines = rawSteps
         .map((s) => {
@@ -1934,13 +2071,24 @@ function renderRecipeList(listOverride) {
       stepsWrap.classList.add("empty");
     }
 
+    stepsWrap.style.display = "none";
+
+    // 點卡片 → 展開 / 收起 材料 + 步驟
+    card.addEventListener("click", () => {
+      const expanded = card.classList.toggle("expanded");
+      ingWrap.style.display = expanded ? "block" : "none";
+      stepsWrap.style.display = expanded ? "block" : "none";
+      caret.textContent = expanded ? "▴" : "▾";
+    });
+
     inner.appendChild(titleRow);
     inner.appendChild(meta);
+    inner.appendChild(ratioRow);
+    inner.appendChild(ingWrap);
     inner.appendChild(stepsWrap);
-
     card.appendChild(inner);
 
-    // 右滑刪除（跟參考食譜 / 實驗一樣風格）
+    // 右滑刪除
     const swipeActions = document.createElement("div");
     swipeActions.className = "card-swipe-actions";
 
@@ -1948,7 +2096,6 @@ function renderRecipeList(listOverride) {
     deleteBtn.type = "button";
     deleteBtn.className = "swipe-delete-btn";
     deleteBtn.textContent = "刪除";
-
     deleteBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       const ok = window.confirm(
@@ -1961,7 +2108,7 @@ function renderRecipeList(listOverride) {
     swipeActions.appendChild(deleteBtn);
     card.appendChild(swipeActions);
 
-    // touch 滑動效果
+    // 手機右滑效果
     let touchStartX = 0;
     let touchEndX = 0;
 
@@ -1981,4 +2128,3 @@ function renderRecipeList(listOverride) {
     container.appendChild(card);
   });
 }
-
