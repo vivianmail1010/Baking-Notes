@@ -1519,3 +1519,37 @@ textarea {
   font-size: 0.85rem;
   line-height: 1.4;
 }
+
+/* 食譜列表鋪滿寬度 */
+#recipe-list {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: visible;
+}
+
+/* 卡片不要太窄、預設吃滿手機寬度 */
+.card.recipe-card {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0 0 16px 0;   /* 上下留空，左右不要再推來推去 */
+}
+
+/* 步驟區塊完全展開顯示 */
+.card-steps,
+.recipe-steps-list {
+  max-height: none;
+  overflow: visible;
+}
+
+/* 如果之前有做多行省略，這裡把它關掉 */
+.card-steps {
+  display: block;
+  -webkit-line-clamp: unset;
+  -webkit-box-orient: unset;
+  text-overflow: clip;
+}
+
+/* 步驟每行正常換行顯示 */
+.recipe-steps-list li {
+  white-space: normal;
+}
