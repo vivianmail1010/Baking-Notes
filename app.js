@@ -1826,3 +1826,157 @@ function setupStepEditor() {
 
   addStepBtn.addEventListener("click", () => addStep());
 }
+// ---------- 食譜列表（支援字串步驟 / 陣列步驟） ----------
+function renderRecipeList(listOverride) {
+  const list = Array.isArray(listOverride) ? listOverride : recipes;
+  const container = document.getElementById("recipe-list");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  if (!list.length) {
+    const empty = document.createElement("div");
+    empty.className = "empty-text";
+    empty.textContent = "還沒有任何食譜，可以先新增一個常用配方。";
+    container.appendChild(empty);
+    return;
+  }
+
+  // 釘選在前，其他照建立時間新到舊
+  const sorted = list.slice().sort((a, b) => {
+    if (a.pinned && !b.pinned) return -1;
+    if (!a.pinned && b.pinned) return 1;
+    return (b.createdAt || 0) - (a.createdAt || 0);
+  });
+
+  sorted.forEach((recipe) => {
+    const card = document.createElement("div");
+    card.className = "card recipe-card";
+
+    // 點整張卡片 = 編輯食譜
+    card.addEventListener("click", () => {
+      startEditRecipe(recipe.id);
+    });
+
+    // 內部容器
+    const inner = document.createElement("div");
+    inner.className = "card-inner";
+
+    // 標題列
+    const titleRow = document.createElement("div");
+    titleRow.className = "card-title-row";
+
+    const titleEl = document.createElement("div");
+    titleEl.className = "card-title";
+    titleEl.textContent = recipe.name || "未命名食譜";
+
+    const pinBtn = document.createElement("button");
+    pinBtn.type = "button";
+    pinBtn.className = "pin-btn";
+    pinBtn.textContent = recipe.pinned ? "★" : "☆";
+    pinBtn.title = recipe.pinned ? "取消釘選" : "釘選這個食譜";
+
+    pinBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      toggleRecipePin(recipe.id);
+    });
+
+    titleRow.appendChild(titleEl);
+    titleRow.appendChild(pinBtn);
+
+    // meta 行：分類 / 來源
+    const meta = document.createElement("div");
+    meta.className = "card-meta";
+    const parts = [];
+    if (recipe.category) parts.push(recipe.category);
+    if (recipe.serving) parts.push(recipe.serving);
+    if (recipe.source) parts.push(recipe.source);
+    meta.textContent = parts.join(" · ");
+
+    // 步驟預覽區
+    const stepsWrap = document.createElement("div");
+    stepsWrap.className = "card-steps";
+
+    const rawSteps = recipe.steps;
+    let lines = [];
+
+    // 支援三種格式：
+    // 1) 字串（用 \n 分行）
+    // 2) 陣列字串：["步驟1", "步驟2"]
+    // 3) 陣列物件：[{ text: "步驟1" }, { text: "步驟2" }]
+    if (Array.isArray(rawSteps)) {
+      lines = rawSteps
+        .map((s) => {
+          if (typeof s === "string") return s.trim();
+          if (s && typeof s.text === "string") return s.text.trim();
+          return "";
+        })
+        .filter(Boolean);
+    } else if (typeof rawSteps === "string") {
+      lines = rawSteps
+        .split("\n")
+        .map((s) => s.trim())
+        .filter(Boolean);
+    }
+
+    if (lines.length) {
+      const ul = document.createElement("ul");
+      ul.className = "recipe-steps-list";
+      lines.forEach((line) => {
+        const li = document.createElement("li");
+        li.textContent = line;
+        ul.appendChild(li);
+      });
+      stepsWrap.appendChild(ul);
+    } else {
+      stepsWrap.textContent = "尚未輸入步驟";
+      stepsWrap.classList.add("empty");
+    }
+
+    inner.appendChild(titleRow);
+    inner.appendChild(meta);
+    inner.appendChild(stepsWrap);
+
+    card.appendChild(inner);
+
+    // 右滑刪除（跟參考食譜 / 實驗一樣風格）
+    const swipeActions = document.createElement("div");
+    swipeActions.className = "card-swipe-actions";
+
+    const deleteBtn = document.createElement("button");
+    deleteBtn.type = "button";
+    deleteBtn.className = "swipe-delete-btn";
+    deleteBtn.textContent = "刪除";
+
+    deleteBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const ok = window.confirm(
+        `確定要刪除「${recipe.name || "這個食譜"}」嗎？\n刪除後就不能復原囉。`
+      );
+      if (!ok) return;
+      deleteRecipe(recipe.id);
+    });
+
+    swipeActions.appendChild(deleteBtn);
+    card.appendChild(swipeActions);
+
+    // touch 滑動效果
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    card.addEventListener("touchstart", (e) => {
+      if (!e.changedTouches || !e.changedTouches.length) return;
+      touchStartX = e.changedTouches[0].clientX;
+    });
+
+    card.addEventListener("touchend", (e) => {
+      if (!e.changedTouches || !e.changedTouches.length) return;
+      touchEndX = e.changedTouches[0].clientX;
+      const diff = touchEndX - touchStartX;
+      if (diff < -30) card.classList.add("swiped");
+      else if (diff > 30) card.classList.remove("swiped");
+    });
+
+    container.appendChild(card);
+  });
+}
