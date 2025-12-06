@@ -19,10 +19,12 @@ body {
 }
 
 .view {
-  height: calc(100vh - 160px);  /* 扣掉上方導航 + 下方 tab */
+  /* 不要固定高度，讓內容自然長高就好 */
+  /* height: calc(100vh - 160px); */
   overflow-y: auto;
   overscroll-behavior: contain;
 }
+
 
 /* App 容器 */
 /* App 容器：預設視為「手機版」 */
@@ -33,7 +35,7 @@ body {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  padding: 16px;
+  padding: 10px;
 }
 
 /* Header */
@@ -92,8 +94,9 @@ body {
 .app-main {
   flex: 1;
   overflow-y: auto;
-  overflow-x: hidden;  /* 🔴 重要：主內容不要左右捲動 */
-  padding-bottom: 24px;
+  overflow-x: hidden;
+  /* 統一在這裡幫所有畫面預留底部 nav 的空間 */
+  padding-bottom: 100px;  /* 可以之後自己調 80~120px 看手感 */
 }
 
 .card,
@@ -1184,10 +1187,6 @@ textarea {
   cursor: pointer;
 }
 
-.view {
-  padding-bottom: calc(70px + 32px); /* 底部tab高度 + 額外空間 */
-}
-
 .steps-filter-bar {
   display: flex;
   gap: 8px;
@@ -1464,35 +1463,24 @@ textarea {
 
 /* 🖥️ 預設維持桌機版：什麼都不動 */
 
-/* 📱 手機版調整：螢幕寬度小於 768px 時套用 */
 @media (max-width: 768px) {
 
-  /* 1. 手機版隱藏上方的目錄列（頂部那排「首頁 / 比例 / 雜記 / 流程庫」） */
+  /* 手機版隱藏上方的目錄列（頂部那排「首頁 / 比例 / 雜記 / 流程庫」） */
   .top-nav {
     display: none;
   }
 
-  /* 2. 手機版把底部 tab 往上挪一點 + 固定在畫面底部上方 */
-  .bottom-tabs {
-    position: fixed;
-    left: 0;
-    right: 0;
-
-    /* 往上抬一點，避免被 iPhone 底部手勢區吃掉 */
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
-
-    /* 如果你的 app 有最大寬度，可以加這行讓它置中（沒有就刪掉） */
-    max-width: 768px;
-    margin: 0 auto;
-
-    z-index: 100; /* 確保蓋在內容上面 */
+  /* 手機版：把底部 nav 往上抬一點，避開 iPhone 底部手勢區 & Safari bar */
+  .bottom-nav {
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
   }
 
-  /* 3. 內容區下面留空間，不要被底部 tab 擋住 */
+  /* 內容區多留一些底部空間，避免被 nav 蓋住 */
   .app-main {
-    padding-bottom: 100px;  /* 可依實際高度改成 80~120px */
+    padding-bottom: calc(66px + env(safe-area-inset-bottom, 0px) + 24px);
   }
 }
+
 
 .step-row {
   display: flex;
