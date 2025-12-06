@@ -19,12 +19,10 @@ body {
 }
 
 .view {
-  /* 不要固定高度，讓內容自然長高就好 */
-  /* height: calc(100vh - 160px); */
-  overflow-y: auto;
-  overscroll-behavior: contain;
+  /* 讓 section 跟著整頁一起捲，不要自己當 scroll 容器 */
+  overflow: visible;
+  overscroll-behavior: auto;
 }
-
 
 /* App 容器 */
 /* App 容器：預設視為「手機版」 */
@@ -34,7 +32,6 @@ body {
   margin: 0 auto;
   min-height: 100vh;
   display: flex;
-  flex-direction: column;
   padding: 10px;
 }
 
@@ -92,8 +89,6 @@ body {
 
 /* Main content */
 .app-main {
-  flex: 1;
-  overflow-y: auto;
   overflow-x: hidden;
   /* 統一在這裡幫所有畫面預留底部 nav 的空間 */
   padding-bottom: 100px;  /* 可以之後自己調 80~120px 看手感 */
