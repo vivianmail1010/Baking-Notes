@@ -32,6 +32,7 @@ body {
   margin: 0 auto;
   min-height: 100vh;
   display: flex;
+  flex-direction: column;
   padding: 10px;
 }
 
@@ -1541,15 +1542,52 @@ textarea {
   overflow: visible;
 }
 
-/* 如果之前有做多行省略，這裡把它關掉 */
+/* 步驟區塊完全展開顯示 */
 .card-steps {
   display: block;
-  -webkit-line-clamp: unset;
-  -webkit-box-orient: unset;
-  text-overflow: clip;
 }
+
+/* 整個步驟列表不限制高度、不捲軸 */
+.recipe-steps-list {
+  max-height: none;
+  overflow: visible;
+}
+
+/* 每一行步驟正常換行顯示 */
+.recipe-steps-list li {
+  white-space: normal;
+}
+
 
 /* 步驟每行正常換行顯示 */
 .recipe-steps-list li {
   white-space: normal;
+}
+
+/* 手機版：食譜列表不要擠成右邊小柱，改成上下排、吃滿寬度 */
+@media (max-width: 900px) {
+  /* 你之前兩欄的外層容器，名字大概會是這個 */
+  .layout-two-column {
+    display: block;        /* 原本可能是 display:flex; */
+  }
+
+  /* 右邊那個「食譜庫」那欄 */
+  .recipe-list-panel {
+    width: 100%;
+    max-width: 100%;
+    margin-top: 16px;      /* 跟上面的主頁卡片拉一點距離 */
+  }
+
+  /* 食譜卡片自己也吃滿寬度 */
+  #recipe-list {
+    width: 100%;
+    max-width: 100%;
+    display: block;
+  }
+
+  .card.recipe-card {
+    width: 100%;
+    box-sizing: border-box;
+    margin: 0 0 16px 0;
+  }
 }
