@@ -683,7 +683,7 @@ function renderRecipeList(listOverride) {
         preview.appendChild(eqRow);
       }
 
-      // 步驟 / 備註（1. 2. 3. 清單）
+            // 步驟 / 備註：全部顯示，不要縮減
       const stepsRow = document.createElement("div");
       stepsRow.className = "recipe-preview-row";
 
@@ -698,31 +698,22 @@ function renderRecipeList(listOverride) {
           .filter(Boolean);
 
         if (lines.length === 1) {
-          // 只有一行 → 當備註
+          // 只有一行 → 當備註，顯示完整
           const stepsText = document.createElement("span");
           stepsText.className = "recipe-preview-text";
-          const s = lines[0];
-          stepsText.textContent = s.length > 120 ? s.slice(0, 120) + "…" : s;
-
+          stepsText.textContent = lines[0];  // 不再切 120 字
           stepsRow.appendChild(stepsLabel);
           stepsRow.appendChild(stepsText);
         } else {
-          // 多行 → 1. 2. 3. 條列
+          // 多行 → 全部列出來
           const list = document.createElement("ol");
           list.className = "recipe-preview-steps";
 
-          const maxLines = 4; // 最多預覽前 4 步
-          lines.slice(0, maxLines).forEach((line) => {
+          lines.forEach((line) => {
             const li = document.createElement("li");
             li.textContent = line;
             list.appendChild(li);
           });
-
-          if (lines.length > maxLines) {
-            const more = document.createElement("li");
-            more.textContent = `…（共 ${lines.length} 步）`;
-            list.appendChild(more);
-          }
 
           stepsRow.appendChild(stepsLabel);
           stepsRow.appendChild(list);
@@ -736,7 +727,7 @@ function renderRecipeList(listOverride) {
       }
 
       preview.appendChild(stepsRow);
-    } // ←←← 這個大括號一定要有！
+    } 
 
     ratioBtn.addEventListener("click", (e) => {
       e.stopPropagation();
