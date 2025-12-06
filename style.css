@@ -1065,8 +1065,6 @@ textarea {
   display: block;
 }
 
-/* ---- 修正 新增 / 編輯食譜 modal 顯示 ---- */
-
 /* 整個彈出視窗一定要貼齊左右邊，不要超出畫面 */
 .recipe-modal {
   left: 0;
