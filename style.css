@@ -1699,3 +1699,36 @@ textarea {
   text-align: right;
   white-space: nowrap;
 }
+
+.card-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* 左邊：小箭頭 + 標題 */
+.card-title-left {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* 右邊：倍率 + 編輯 + 星星 */
+.card-title-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 倍率區本身稍微精緻一點 */
+.ratio-box {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8rem;
+}
+
+.ratio-input {
+  width: 42px;
+  text-align: center;
+}

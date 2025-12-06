@@ -1915,11 +1915,6 @@ function renderRecipeList(listOverride) {
       toggleRecipePin(recipe.id);
     });
 
-    titleRow.appendChild(caret);
-    titleRow.appendChild(titleEl);
-    titleRow.appendChild(editBtn);
-    titleRow.appendChild(pinBtn);
-
     // ====== meta 行：分類 / 份量 / 來源 ======
     const meta = document.createElement("div");
     meta.className = "card-meta";
@@ -1969,6 +1964,22 @@ function renderRecipeList(listOverride) {
     ratioRow.appendChild(ratioLabel);
     ratioRow.appendChild(ratioInput);
     ratioRow.appendChild(ratioBtn);
+
+    // ====== 把標題排成 左/右 兩塊 ======
+const titleLeft = document.createElement("div");
+titleLeft.className = "card-title-left";
+titleLeft.appendChild(caret);
+titleLeft.appendChild(titleEl);
+
+const titleRight = document.createElement("div");
+titleRight.className = "card-title-right";
+titleRight.appendChild(ratioRow); // 右上角先放倍率
+titleRight.appendChild(editBtn);  // 再放編輯
+titleRight.appendChild(pinBtn);   // 最右邊是星星
+
+titleRow.appendChild(titleLeft);
+titleRow.appendChild(titleRight);
+
 
     // ====== 材料區（小字、無 bullet，會顯示容量）=======
     const ingWrap = document.createElement("div");
@@ -2073,7 +2084,7 @@ function renderRecipeList(listOverride) {
 
     stepsWrap.style.display = "none";
 
-    // 點卡片 → 展開 / 收起 材料 + 步驟
+        // 點卡片 → 展開 / 收起 材料 + 步驟
     card.addEventListener("click", () => {
       const expanded = card.classList.toggle("expanded");
       ingWrap.style.display = expanded ? "block" : "none";
@@ -2081,9 +2092,9 @@ function renderRecipeList(listOverride) {
       caret.textContent = expanded ? "▴" : "▾";
     });
 
+    // ✅ 只要加這四個，ratioRow 現在已經在 titleRow 裡面，不用再加一次
     inner.appendChild(titleRow);
     inner.appendChild(meta);
-    inner.appendChild(ratioRow);
     inner.appendChild(ingWrap);
     inner.appendChild(stepsWrap);
     card.appendChild(inner);
